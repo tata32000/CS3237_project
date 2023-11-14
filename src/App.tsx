@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { auth } from './firebaseConfig'; // Import your Firebase auth
+import { auth } from './firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import LoginComponent from './LoginComponent';
 import MainPage from './MainPage';
-// ...other imports
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
