@@ -3,38 +3,37 @@ import { Amplify, Auth, Hub } from 'aws-amplify';
 import { CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 import awsConfig from './aws-exports';
 
-// copied from serviceWorker.js to know if it is localhost or not
 const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
+  window.location.hostname === "localhost" ||
     // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
+    window.location.hostname === "[::1]" ||
     // 127.0.0.1/8 is considered localhost for IPv4.
     window.location.hostname.match(
       /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
     )
 );
 
-// by default, say it's localhost
-const oauth = {
-  domain: 'xxx.auth.us-east-2.amazoncognito.com',
-  scope: ['phone', 'email', 'profile', 'openid', 'aws.cognito.signin.user.admin'],
-  redirectSignIn: 'http://localhost:3000/',
-  redirectSignOut: 'http://localhost:3000/',
-  responseType: 'code' // or 'token', note that REFRESH token will only be generated when the responseType is code
-};
+// Assuming you have two redirect URIs, and the first is for localhost and second is for production
+const [
+  localRedirectSignIn,
+  productionRedirectSignIn,
+] = awsConfig.oauth.redirectSignIn.split(",");
 
-// if not, update the URLs
-if (!isLocalhost) {
-  oauth.redirectSignIn = 'https://master.xxx.amplifyapp.com/';
-  oauth.redirectSignOut = 'https://master.xxx.amplifyapp.com/';
+const [
+  localRedirectSignOut,
+  productionRedirectSignOut,
+] = awsConfig.oauth.redirectSignOut.split(",");
+
+const updatedAwsConfig = {
+  ...awsConfig,
+  oauth: {
+    ...awsConfig.oauth,
+    redirectSignIn: isLocalhost ? localRedirectSignIn : productionRedirectSignIn,
+    redirectSignOut: isLocalhost ? localRedirectSignOut : productionRedirectSignOut,
+  }
 }
 
-// copy the constant config (aws-exports.js) because config is read only.
-const configUpdate = awsConfig;
-// update the configUpdate constant with the good URLs
-configUpdate.oauth = oauth;
-// Configure Amplify with configUpdate
-Amplify.configure(configUpdate);
+Amplify.configure(updatedAwsConfig);
 
 const LoginComponent = () => {
 
