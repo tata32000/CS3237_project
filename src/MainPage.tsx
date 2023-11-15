@@ -1,17 +1,53 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from './firebaseConfig'; 
-import { signOutUser } from './authService'; 
-// import mqtt, { MqttClient } from 'mqtt';
-// import CERT from './certs/cert';
-// import KEY from './certs/privateKey';
-// import CA from './certs/rootCA';
-import { PubSub } from 'aws-amplify';
+import { Auth, PubSub, Amplify} from 'aws-amplify';
 import { AWSIoTProvider } from '@aws-amplify/pubsub';
 import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
 import { Hub } from 'aws-amplify';
+import awsConfig from './aws-exports';
+
+Amplify.configure(awsConfig);
+Auth.currentCredentials().then((info) => {
+  const cognitoIdentityId = info.identityId;
+  console.log(cognitoIdentityId);
+});
 
 const MainPage = () => {
+  const [user, setUser] = useState(null);
+  const [customState, setCustomState] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = Hub.listen("auth", ({ payload: { event, data }}) => {
+      switch (event) {
+        case "signIn":
+          setUser(data);
+          break;
+        case "signOut":
+          setUser(null);
+          break;
+        case "customOAuthState":
+          setCustomState(data);
+          console.log(customState)
+      }
+    });
+
+    getUser();
+
+    return unsubscribe;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getUser = async (): Promise<void> => {
+    try {
+      const currentUser = await Auth.currentAuthenticatedUser();
+      setUser(currentUser);
+      console.log(user)
+    } catch(error) {
+      console.error(error);
+      console.log("Not signed in");
+    }
+  };
+
   const [doorState, setDoorState] = useState('Unknown');
 
   useEffect(() => {
@@ -59,17 +95,9 @@ const MainPage = () => {
   };
 
   const navigate = useNavigate();
-  const [userName, setUserName] = useState('');
-
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setUserName(user.displayName || 'User'); // Fallback to 'User' if name is not available
-    }
-  }, []);
 
   const handleLogout = async () => {
-    await signOutUser();
+    await Auth.signOut();
     navigate('/login');
   };
 
@@ -77,7 +105,7 @@ const MainPage = () => {
     <div className="flex justify-center items-center h-screen">
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Main Page</h1>
-        <p className="mb-4">Hi {userName}!</p> 
+        <p className="mb-4">Hi!</p> 
         <p>Will see some picture here</p>
         <div className="text-center">
         <h2 className="mb-4">Door State: {doorState}</h2>

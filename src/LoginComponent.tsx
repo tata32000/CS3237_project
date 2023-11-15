@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Amplify, Auth, Hub } from 'aws-amplify';
-import { CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 import awsConfig from './aws-exports';
 
 const isLocalhost = Boolean(
@@ -76,7 +75,7 @@ const LoginComponent = () => {
     <div className="flex justify-center items-center h-screen">
       <div className="text-center">
         <button 
-          onClick={() => Auth.federatedSignIn({provider: CognitoHostedUIIdentityProvider.Google })}
+          onClick={() => Auth.federatedSignIn()}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
           Sign in with Google
