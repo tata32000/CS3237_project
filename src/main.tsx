@@ -15,11 +15,15 @@ const isLocalhost = Boolean(
     )
 );
 
-const localRedirectSignIn = 'http://localhost:5173/main';
-const productionRedirectSignIn = 'https://main.d1giddisomceg0.amplifyapp.com/main';
+const [
+  localRedirectSignIn,
+  productionRedirectSignIn,
+] = awsConfig.oauth.redirectSignIn.split(',');
 
-const localRedirectSignOut = 'http://localhost:5173/login';
-const productionRedirectSignOut = 'https://main.d1giddisomceg0.amplifyapp.com/login';
+const [
+  localRedirectSignOut,
+  productionRedirectSignOut,
+] = awsConfig.oauth.redirectSignOut.split(',');
 
 const updatedAwsConfig = {
   ...awsConfig,
