@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Amplify, Storage } from 'aws-amplify';
-import awsConfig from './aws-exports';
+import { Storage } from 'aws-amplify';
 
-Amplify.configure(awsConfig);
 
 const RecentImage = () => {
   const [imageUrl, setImageUrl] = useState<string>('');

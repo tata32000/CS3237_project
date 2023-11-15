@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Auth, PubSub, Amplify} from 'aws-amplify';
+import { Auth, PubSub } from 'aws-amplify';
 import { AWSIoTProvider } from '@aws-amplify/pubsub';
 import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
 import { Hub } from 'aws-amplify';
-import awsConfig from './aws-exports';
 import RecentImage from './RecentImage';
-
-Amplify.configure(awsConfig);
 
 const MainPage = () => {
   const [user, setUser] = useState(null);
