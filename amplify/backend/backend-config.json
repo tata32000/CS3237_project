@@ -26,5 +26,31 @@
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
     }
+  },
+  "parameters": {
+    "AMPLIFY_storage_cs3237project2339c0eb_bucketName": {
+      "usedBy": [
+        {
+          "category": "storage",
+          "resourceName": "cs3237project2339c0eb"
+        }
+      ]
+    },
+    "AMPLIFY_storage_cs3237project2339c0eb_region": {
+      "usedBy": [
+        {
+          "category": "storage",
+          "resourceName": "cs3237project2339c0eb"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "cs3237project2339c0eb": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3",
+      "serviceType": "imported"
+    }
   }
 }
