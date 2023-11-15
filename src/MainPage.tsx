@@ -62,7 +62,9 @@ const MainPage = () => {
     PubSub.subscribe('esp32/door').subscribe({
       next: (data) => {
         console.log('Message received', data);
-        setDoorState('test');
+        const jsonObject = JSON.parse(JSON.stringify(data.value));
+        const actionValue = jsonObject.action ? jsonObject.action : 'default value';
+        setDoorState(actionValue);
       },
       error: (error) => console.error(error),
       complete: () => console.log('Done'),
