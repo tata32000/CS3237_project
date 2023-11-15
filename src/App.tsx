@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { auth } from './firebaseConfig'; 
-import { onAuthStateChanged } from 'firebase/auth';
+import { Auth } from 'aws-amplify'; 
 import LoginComponent from './LoginComponent';
 import MainPage from './MainPage';
 
@@ -9,15 +8,10 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in
-        setIsLoggedIn(true);
-      } else {
-        // User is signed out
-        setIsLoggedIn(false);
-      }
-    });
+    Auth.currentAuthenticatedUser()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .then(_user => setIsLoggedIn(true))
+      .catch(() => setIsLoggedIn(false));
   }, []);
 
   return (

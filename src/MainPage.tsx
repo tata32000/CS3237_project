@@ -2,59 +2,52 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from './firebaseConfig'; 
 import { signOutUser } from './authService'; 
-import mqtt, { MqttClient } from 'mqtt';
-import CERT from './certs/cert';
-import KEY from './certs/privateKey';
-import CA from './certs/rootCA';
+// import mqtt, { MqttClient } from 'mqtt';
+// import CERT from './certs/cert';
+// import KEY from './certs/privateKey';
+// import CA from './certs/rootCA';
+import { PubSub } from 'aws-amplify';
+import { AWSIoTProvider } from '@aws-amplify/pubsub';
+import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
+import { Hub } from 'aws-amplify';
 
 const MainPage = () => {
   const [doorState, setDoorState] = useState('Unknown');
-  const [client, setClient] = useState<MqttClient>(null as unknown as MqttClient);
 
   useEffect(() => {
+    PubSub.addPluggable(
+      new AWSIoTProvider({
+        aws_pubsub_region: 'ap-southeast-2',
+        aws_pubsub_endpoint:
+          'wss://a3ir1nqy23cnya-ats.iot.ap-southeast-2.amazonaws.com/mqtt'
+      })
+    );
 
-    const mqttClient = mqtt.connect(
-      'wss://a3ir1nqy23cnya-ats.iot.ap-southeast-2.amazonaws.com', 
-    {
-      key:  KEY,
-      cert: CERT,
-      ca: [ CA ],
-      protocolId: 'MQTT',
-      protocolVersion: 5,
-    });
+    PubSub.subscribe('esp32/door').subscribe({
+      next: (data) => {
+        console.log('Message received', data);
+        setDoorState('test');
+      },
+      error: (error) => console.error(error),
+      complete: () => console.log('Done'),
+    })
 
-    mqttClient.on('connect', () => {
-      console.log('Connected to MQTT Broker');
-      mqttClient.subscribe('esp32/door');
-    });
-
-    mqttClient.on('error', (error) => {
-      console.error('Connection error:', error);
-    });
-    
-    mqttClient.on('offline', () => {
-      console.log('Client went offline');
-    });    
-
-    mqttClient.on('message', (topic, message) => {
-      const doorState = JSON.parse(message.toString())['state'];
-      if (topic === 'esp32/door') {
-        setDoorState(doorState.toString());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Hub.listen('pubsub', (data: any) => {
+      const { payload } = data;
+      if (payload.event === CONNECTION_STATE_CHANGE) {
+        const connectionState = payload.data.connectionState as ConnectionState;
+        console.log(connectionState);
       }
     });
 
-    setClient(mqttClient);
-
     return () => {
-      mqttClient.end(); // Disconnect client when the component unmounts
+      PubSub.removePluggable('AWSIoTProvider'); // Disconnect client when the component unmounts
     };
   }, []);
 
-  const publishMessage = (action: string) => {
-    if (client) {
-      const message = JSON.stringify({ 'state': action });
-      client.publish('esp32/door', message);
-    }
+  const publishMessage = async (action: string) => {
+    await PubSub.publish('esp32/door', { action });
   };
 
   const handleLock = () => {
