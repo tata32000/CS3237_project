@@ -70,6 +70,9 @@ const LoginComponent = () => {
     }
   };
 
+  console.log(user);
+  console.log(customState)
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="text-center">
