@@ -5,6 +5,7 @@ import { AWSIoTProvider } from '@aws-amplify/pubsub';
 import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
 import { Hub } from 'aws-amplify';
 import awsConfig from './aws-exports';
+import RecentImage from './RecentImage';
 
 Amplify.configure(awsConfig);
 
@@ -45,6 +46,7 @@ const MainPage = () => {
   };
 
   const [doorState, setDoorState] = useState('Unknown');
+  const [mqttStatus, setMqttStatus] = useState('Unknown');
 
   useEffect(() => {
     PubSub.addPluggable(
@@ -72,6 +74,7 @@ const MainPage = () => {
       if (payload.event === CONNECTION_STATE_CHANGE) {
         const connectionState = payload.data.connectionState as ConnectionState;
         console.log(connectionState);
+        setMqttStatus(connectionState)
       }
     });
 
@@ -103,8 +106,9 @@ const MainPage = () => {
     <div className="flex justify-center items-center h-screen">
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Main Page</h1>
-        <p className="mb-4">Hi!</p> 
-        <p>Will see some picture here</p>
+        <p className="mb-4">MQTT status: {mqttStatus}</p> 
+        <p>Latest picture</p>
+        <RecentImage />
         <div className="text-center">
         <h2 className="mb-4">Door State: {doorState}</h2>
         <button 
