@@ -7,10 +7,6 @@ import { Hub } from 'aws-amplify';
 import awsConfig from './aws-exports';
 
 Amplify.configure(awsConfig);
-Auth.currentCredentials().then((info) => {
-  const cognitoIdentityId = info.identityId;
-  console.log(cognitoIdentityId);
-});
 
 const MainPage = () => {
   const [user, setUser] = useState(null);
