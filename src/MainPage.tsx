@@ -44,6 +44,7 @@ const MainPage = () => {
 
   const [doorState, setDoorState] = useState('Unknown');
   const [mqttStatus, setMqttStatus] = useState('Unknown');
+  const [classifierStatus, setClassifierStatus] = useState('Nothing');
 
   useEffect(() => {
     PubSub.addPluggable(
@@ -60,6 +61,22 @@ const MainPage = () => {
         const jsonObject = JSON.parse(JSON.stringify(data.value));
         const actionValue = jsonObject.action ? jsonObject.action : 'default value';
         setDoorState(actionValue);
+      },
+      error: (error) => console.error(error),
+      complete: () => console.log('Done'),
+    })
+
+    PubSub.subscribe('esp32/classifier').subscribe({
+      next: (data) => {
+        console.log('Message received', data);
+        const jsonObject = JSON.parse(JSON.stringify(data.value));
+        const className = jsonObject.classification ? jsonObject.classification : 'Nothing';
+        if (className === 'Person') {
+          alert('Someone is at the door!')
+        } else if (className === 'Package') {
+          alert('Package delivered!')
+        }
+        setClassifierStatus(className);
       },
       error: (error) => console.error(error),
       complete: () => console.log('Done'),
@@ -107,6 +124,7 @@ const MainPage = () => {
         <p>Latest picture</p>
         <RecentImage />
         <div className="text-center">
+        <h2 className="mb-4">{classifierStatus} detected</h2>
         <h2 className="mb-4">Door State: {doorState}</h2>
         <button 
           onClick={handleLock}

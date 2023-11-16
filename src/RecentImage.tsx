@@ -1,11 +1,29 @@
 import { useEffect, useState } from 'react';
-import { Storage } from 'aws-amplify';
+import { Storage, PubSub } from 'aws-amplify';
+import { AWSIoTProvider } from '@aws-amplify/pubsub';
 
 
 const RecentImage = () => {
   const [imageUrl, setImageUrl] = useState<string>('');
 
   useEffect(() => {
+    PubSub.addPluggable(
+        new AWSIoTProvider({
+          aws_pubsub_region: 'ap-southeast-2',
+          aws_pubsub_endpoint:
+            'wss://a3ir1nqy23cnya-ats.iot.ap-southeast-2.amazonaws.com/mqtt'
+        })
+      );
+
+    PubSub.subscribe('esp32/classifier').subscribe({
+        next: (data) => {
+            fetchImage();
+            console.log('Message received', data);
+        },
+        error: (error) => console.error(error),
+        complete: () => console.log('Done'),
+    })
+
     const fetchImage = async () => {
       try {
         // Get a list of files from the specified S3 bucket
